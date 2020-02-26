@@ -1,8 +1,8 @@
-import videojs from 'video.js';
-import VimeoPlayer from '@vimeo/player';
+import videojs from "video.js";
+import VimeoPlayer from "@vimeo/player";
 
-const Component = videojs.getComponent('Component');
-const Tech = videojs.getComponent('Tech');
+const Component = videojs.getComponent("Component");
+const Tech = videojs.getComponent("Tech");
 let cssInjected = false;
 
 // Since the iframe can't be touched using Vimeo's way of embedding,
@@ -21,11 +21,11 @@ function injectCss() {
       height: 100%;
     }
   `;
-  const head = document.head || document.getElementsByTagName('head')[0];
+  const head = document.head || document.getElementsByTagName("head")[0];
 
-  const style = document.createElement('style');
+  const style = document.createElement("style");
 
-  style.type = 'text/css';
+  style.type = "text/css";
 
   if (style.styleSheet) {
     style.styleSheet.cssText = css;
@@ -81,39 +81,41 @@ class Vimeo extends Tech {
     }
     if (this.options_.color) {
       // vimeo is the only API on earth to reject hex color with leading #
-      vimeoOptions.color = this.options_.color.replace(/^#/, '');
+      vimeoOptions.color = this.options_.color.replace(/^#/, "");
     }
 
     this._player = new VimeoPlayer(this.el(), vimeoOptions);
     this.initVimeoState();
 
-    ['play', 'pause', 'ended', 'timeupdate', 'progress', 'seeked'].forEach(e => {
-      this._player.on(e, (progress) => {
-        if (this._vimeoState.progress.duration !== progress.duration) {
-          this.trigger('durationchange');
-        }
-        this._vimeoState.progress = progress;
-        this.trigger(e);
-      });
-    });
+    ["play", "pause", "ended", "timeupdate", "progress", "seeked"].forEach(
+      e => {
+        this._player.on(e, progress => {
+          if (this._vimeoState.progress.duration !== progress.duration) {
+            this.trigger("durationchange");
+          }
+          this._vimeoState.progress = progress;
+          this.trigger(e);
+        });
+      }
+    );
 
-    this._player.on('pause', () => this._vimeoState.playing = false);
-    this._player.on('play', () => {
+    this._player.on("pause", () => (this._vimeoState.playing = false));
+    this._player.on("play", () => {
       this._vimeoState.playing = true;
       this._vimeoState.ended = false;
     });
-    this._player.on('ended', () => {
+    this._player.on("ended", () => {
       this._vimeoState.playing = false;
       this._vimeoState.ended = true;
     });
-    this._player.on('volumechange', (v) => this._vimeoState.volume = v);
-    this._player.on('error', e => this.trigger('error', e));
+    this._player.on("volumechange", v => (this._vimeoState.volume = v));
+    this._player.on("error", e => this.trigger("error", e));
 
     this.triggerReady();
   }
 
   initVimeoState() {
-    const state = this._vimeoState = {
+    const state = (this._vimeoState = {
       ended: false,
       playing: false,
       volume: 0,
@@ -122,21 +124,21 @@ class Vimeo extends Tech {
         percent: 0,
         duration: 0
       }
-    };
+    });
 
-    this._player.getCurrentTime().then(time => state.progress.seconds = time);
-    this._player.getDuration().then(time => state.progress.duration = time);
-    this._player.getPaused().then(paused => state.playing = !paused);
-    this._player.getVolume().then(volume => state.volume = volume);
+    this._player.getCurrentTime().then(time => (state.progress.seconds = time));
+    this._player.getDuration().then(time => (state.progress.duration = time));
+    this._player.getPaused().then(paused => (state.playing = !paused));
+    this._player.getVolume().then(volume => (state.volume = volume));
   }
 
   createEl() {
-    const div = videojs.createEl('div', {
+    const div = videojs.createEl("div", {
       id: this.options_.techId
     });
 
-    div.style.cssText = 'width:100%;height:100%;top:0;left:0;position:absolute';
-    div.className = 'vjs-vimeo';
+    div.style.cssText = "width:100%;height:100%;top:0;left:0;position:absolute";
+    div.className = "vjs-vimeo";
 
     return div;
   }
@@ -229,11 +231,11 @@ Vimeo.nativeSourceHandler = {};
  * @return {String}         'maybe', or '' (empty string)
  */
 Vimeo.nativeSourceHandler.canPlayType = function(source) {
-  if (source === 'video/vimeo') {
-    return 'maybe';
+  if (source === "video/vimeo") {
+    return "maybe";
   }
 
-  return '';
+  return "";
 };
 
 /*
@@ -250,7 +252,7 @@ Vimeo.nativeSourceHandler.canHandleSource = function(source) {
     return Vimeo.nativeSourceHandler.canPlayType(source.src);
   }
 
-  return '';
+  return "";
 };
 
 // @note: Copied over from YouTube — not sure this is relevant
@@ -259,14 +261,17 @@ Vimeo.nativeSourceHandler.handleSource = function(source, tech) {
 };
 
 // @note: Copied over from YouTube — not sure this is relevant
-Vimeo.nativeSourceHandler.dispose = function() { };
+Vimeo.nativeSourceHandler.dispose = function() {};
 
 Vimeo.registerSourceHandler(Vimeo.nativeSourceHandler);
 
-Component.registerComponent('Vimeo', Vimeo);
-Tech.registerTech('Vimeo', Vimeo);
+if (typeof videojs.registerTech !== "undefined") {
+  videojs.registerTech("Vimeo", Vimeo);
+} else {
+  videojs.registerComponent("Vimeo", Vimeo);
+}
 
 // Include the version number.
-Vimeo.VERSION = '0.0.1';
+Vimeo.VERSION = "0.0.1";
 
 export default Vimeo;
