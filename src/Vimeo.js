@@ -109,7 +109,10 @@ class Vimeo extends Tech {
       this._vimeoState.playing = false;
       this._vimeoState.ended = true;
     });
-    this._player.on("volumechange", v => (this._vimeoState.volume = v));
+    this._player.on(
+      "volumechange",
+      ({ volume }) => (this._vimeoState.volume = volume)
+    );
     this._player.on("error", e => this.trigger("error", e));
 
     this.triggerReady();
@@ -130,7 +133,14 @@ class Vimeo extends Tech {
     this._player.getCurrentTime().then(time => (state.progress.seconds = time));
     this._player.getDuration().then(time => (state.progress.duration = time));
     this._player.getPaused().then(paused => (state.playing = !paused));
-    this._player.getVolume().then(volume => (state.volume = volume));
+    this._player.getVolume().then(volume => {
+      if (this.options_.muted) {
+        volume = 0;
+        this.setMuted(true);
+      }
+
+      state.volume = volume;
+    });
   }
 
   createEl() {
@@ -206,13 +216,25 @@ class Vimeo extends Tech {
     return this._vimeoState.volume === 0;
   }
 
+  setMuted(mute) {
+    this.setVolume(mute ? 0 : 1);
+
+    this.setTimeout(() => {
+      this.trigger("volumechange");
+    }, 50);
+  }
+
   ended() {
     return this._vimeoState.ended;
   }
 
-  // Vimeo does has a mute API and native controls aren't being used,
-  // so setMuted doesn't really make sense and shouldn't be called.
-  // setMuted(mute) {}
+  loop() {
+    return this.options_.loop;
+  }
+
+  setLoop(val) {
+    this.options_.loop = val;
+  }
 }
 
 Vimeo.prototype.featuresTimeupdateEvents = true;
