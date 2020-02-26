@@ -95,11 +95,6 @@
     "uglify-js": "^2.6.1",
     "videojs-standard": "^4.0.0"
   },
-  "config": {
-    "ghooks": {
-      "pre-push": "npm run lint"
-    }
-  },
   "directories": {
     "test": "test"
   },
