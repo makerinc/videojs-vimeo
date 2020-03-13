@@ -2421,6 +2421,7 @@ process.umask = function() { return 0; };
 "use strict";
 
 exports.__esModule = true;
+exports.css = undefined;
 
 var _video = (typeof window !== "undefined" ? window['videojs'] : typeof global !== "undefined" ? global['videojs'] : null);
 
@@ -2442,6 +2443,8 @@ var Component = _video2.default.getComponent("Component");
 var Tech = _video2.default.getComponent("Tech");
 var cssInjected = false;
 
+var css = exports.css = "\n  .vjs-vimeo iframe {\n    position: absolute;\n    top: 0;\n    left: 0;\n    width: 100%;\n    height: 100%;\n  }\n";
+
 // Since the iframe can't be touched using Vimeo's way of embedding,
 // let's add a new styling rule to have the same style as `vjs-tech`
 function injectCss() {
@@ -2449,7 +2452,6 @@ function injectCss() {
     return;
   }
   cssInjected = true;
-  var css = "\n    .vjs-vimeo iframe {\n      position: absolute;\n      top: 0;\n      left: 0;\n      width: 100%;\n      height: 100%;\n    }\n  ";
   var head = document.head || document.getElementsByTagName("head")[0];
 
   var style = document.createElement("style");
@@ -2480,9 +2482,9 @@ var Vimeo = function (_Tech) {
   function Vimeo(options, ready) {
     _classCallCheck(this, Vimeo);
 
+    // injectCss();
     var _this = _possibleConstructorReturn(this, _Tech.call(this, options, ready));
 
-    injectCss();
     _this.setPoster(options.poster);
     _this.initVimeoPlayer();
     return _this;
@@ -2546,8 +2548,9 @@ var Vimeo = function (_Tech) {
       _this2._vimeoState.playing = false;
       _this2._vimeoState.ended = true;
     });
-    this._player.on("volumechange", function (v) {
-      return _this2._vimeoState.volume = v;
+    this._player.on("volumechange", function (_ref) {
+      var volume = _ref.volume;
+      return _this2._vimeoState.volume = volume;
     });
     this._player.on("error", function (e) {
       return _this2.trigger("error", e);
@@ -2557,6 +2560,8 @@ var Vimeo = function (_Tech) {
   };
 
   Vimeo.prototype.initVimeoState = function initVimeoState() {
+    var _this3 = this;
+
     var state = this._vimeoState = {
       ended: false,
       playing: false,
@@ -2578,7 +2583,12 @@ var Vimeo = function (_Tech) {
       return state.playing = !paused;
     });
     this._player.getVolume().then(function (volume) {
-      return state.volume = volume;
+      if (_this3.options_.muted) {
+        volume = 0;
+        _this3.setMuted(true);
+      }
+
+      state.volume = volume;
     });
   };
 
@@ -2655,14 +2665,27 @@ var Vimeo = function (_Tech) {
     return this._vimeoState.volume === 0;
   };
 
+  Vimeo.prototype.setMuted = function setMuted(mute) {
+    var _this4 = this;
+
+    this.setVolume(mute ? 0 : 1);
+
+    this.setTimeout(function () {
+      _this4.trigger("volumechange");
+    }, 50);
+  };
+
   Vimeo.prototype.ended = function ended() {
     return this._vimeoState.ended;
   };
 
-  // Vimeo does has a mute API and native controls aren't being used,
-  // so setMuted doesn't really make sense and shouldn't be called.
-  // setMuted(mute) {}
+  Vimeo.prototype.loop = function loop() {
+    return this.options_.loop;
+  };
 
+  Vimeo.prototype.setLoop = function setLoop(val) {
+    this.options_.loop = val;
+  };
 
   return Vimeo;
 }(Tech);

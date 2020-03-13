@@ -5,6 +5,16 @@ const Component = videojs.getComponent("Component");
 const Tech = videojs.getComponent("Tech");
 let cssInjected = false;
 
+export const css = `
+  .vjs-vimeo iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+`;
+
 // Since the iframe can't be touched using Vimeo's way of embedding,
 // let's add a new styling rule to have the same style as `vjs-tech`
 function injectCss() {
@@ -12,15 +22,6 @@ function injectCss() {
     return;
   }
   cssInjected = true;
-  const css = `
-    .vjs-vimeo iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-  `;
   const head = document.head || document.getElementsByTagName("head")[0];
 
   const style = document.createElement("style");
@@ -48,7 +49,7 @@ class Vimeo extends Tech {
   constructor(options, ready) {
     super(options, ready);
 
-    injectCss();
+    // injectCss();
     this.setPoster(options.poster);
     this.initVimeoPlayer();
   }
