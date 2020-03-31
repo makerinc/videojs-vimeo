@@ -60,7 +60,8 @@ class Vimeo extends Tech {
       byline: false,
       portrait: false,
       title: false,
-      controls: false
+      controls: false,
+      autopause: 0
     };
 
     if (this.options_.autoplay) {
