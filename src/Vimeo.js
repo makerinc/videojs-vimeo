@@ -162,6 +162,10 @@ class Vimeo extends Tech {
     return false;
   }
 
+  playbackRate() {
+    return 1;
+  }
+
   supportsFullScreen() {
     return true;
   }

@@ -2610,6 +2610,10 @@ var Vimeo = function (_Tech) {
     return false;
   };
 
+  Vimeo.prototype.playbackRate = function playbackRate() {
+    return 1;
+  };
+
   Vimeo.prototype.supportsFullScreen = function supportsFullScreen() {
     return true;
   };
